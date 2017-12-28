@@ -15,9 +15,13 @@ spec:
           volumeMounts:
             - mountPath: /etc/docker
               name: cert-dir
-          volumeMounts:
             - mountPath: /hostfile
               name: host-dir
+            - mountPath: /copy_certs.sh
+              name: kube-registry-config
+              subPath: copy_certs.sh
+          securityContext:
+            privileged: true
       volumes:
         - name: cert-dir
           hostPath: 
@@ -25,3 +29,10 @@ spec:
         - name: host-dir
           hostPath: 
             path: /etc/hosts
+        - name: kube-registry-config
+          configMap:
+            name: kube-registry-config
+            items:
+              - key: copy_certs.sh
+                path: copy_certs.sh
+                mode: 0700

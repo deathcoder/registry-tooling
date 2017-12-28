@@ -10,10 +10,11 @@ IFS=$'\n\t'
 function configure_nodes {
   echo
   echo "Tidying up any old registry jobs"
-  kubectl delete job create-certs &> /dev/null || true 
-
+  kubectl delete job create-certs &> /dev/null || true
+  kubectl delete cm kube-registry-config &> /dev/null || true
   echo
   echo "Creating new registry certificate"
+  kubectl create configmap kube-registry-config --from-file=images/create_certs/in.req --from-file=images/create_certs/create_certs.sh --from-file=images/copy_certs/copy_certs.sh
   kubectl create -f k8s/create-certs.yaml
 
   echo
@@ -43,10 +44,14 @@ function configure_nodes {
 
   echo
   echo "Removing any old registry and starting new one..."
+  kubectl delete pvc --namespace=kube-system kube-registry-volume &> /dev/null || true
+  kubectl create -f k8s/reg_pvc.yaml
   kubectl delete rc --namespace=kube-system kube-registry &> /dev/null || true 
   kubectl create -f k8s/reg_controller.yaml
   kubectl delete svc --namespace=kube-system kube-registry &> /dev/null || true 
   kubectl create -f k8s/reg_service.yaml
+  kubectl delete ingress --namespace=kube-system kube-registry-ingress &> /dev/null || true
+  kubectl create -f k8s/reg_ingress.yaml
 
   #wait for cert to become available
   echo
@@ -230,10 +235,10 @@ function process_k8s_args {
       -y|--yes)
         require_confirm=false
         ;;
-#      -n|--name)
-#        registry_host="$2"
-#        shift
-#        ;;
+      --reg-name)
+        registry_host="$2"
+        shift
+        ;;
       *)
         ;;
     esac
@@ -393,7 +398,7 @@ function install_cert {
 
 #start main
 
-default_host="kube-registry.kube-system.svc.cluster.local:31000"
+default_host="kube-registry.com:31000"
 registry_host=$default_host
 registry_port='' #parsed from host later
 
@@ -445,7 +450,8 @@ install-cert
 
 install-k8s-reg
   -y --yes               proceed without asking for confirmation
-
+  --reg-name NAME        full name of the registry including port. Defaults to 
+                         kube-registry.kube-system.svc.cluster.local:31000
 EOF
 )
 

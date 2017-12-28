@@ -7,6 +7,6 @@
  ST                     = Test State or Province
  L                      = Test Locality
  O                      = Local Secure Registry for Kubernetes
- CN                     = kube-registry.kube-system.svc.cluster.local
+ CN                     = kube-registry.com
  emailAddress           = test@email.address
 

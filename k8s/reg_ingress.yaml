@@ -1,0 +1,18 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: kube-registry-ingress
+  namespace: kube-system
+  annotations:
+    ingress.kubernetes.io/ssl-passthrough: "true"
+spec:
+  rules:
+  - host: kube-registry.com
+    http:
+      paths:
+      - backend:
+          serviceName: kube-registry
+          servicePort: 5000
+  tls:
+  - hosts:
+    - kube-registry.com

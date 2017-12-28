@@ -18,6 +18,9 @@ spec:
               name: cert-dir
             - mountPath: /hostfile
               name: host-dir
+            - mountPath: /copy_certs.sh
+              name: kube-registry-config
+              subPath: copy_certs.sh
           securityContext:
             privileged: true
       volumes:
@@ -27,6 +30,13 @@ spec:
         - name: host-dir
           hostPath: 
             path: /etc/hosts
+        - name: kube-registry-config
+          configMap:
+            name: kube-registry-config
+            items:
+              - key: copy_certs.sh
+                path: copy_certs.sh
+                mode: 0700
       nodeSelector: 
         kubernetes.io/hostname: "{{.metadata.name}}"
 ---

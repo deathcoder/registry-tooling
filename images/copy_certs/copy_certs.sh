@@ -2,11 +2,11 @@
 set -e
 set -o pipefail
 
-registry_host="kube-registry.kube-system.svc.cluster.local"
+registry_host="kube-registry.com"
 registry_port="31000"
 registry_host_port="${registry_host}:${registry_port}"
 
-
+echo $registry_host_port
 mkdir --parents "/etc/docker/certs.d/$registry_host_port/"
 echo "copying certs"
 kubectl get secret registry-cert \
